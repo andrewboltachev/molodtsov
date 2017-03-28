@@ -68,8 +68,6 @@
         word (clojure.string/replace word #"д" "ԁ")
         word (clojure.string/replace word #"и" "і")
         word (clojure.string/replace word #"й" "ј")
-
-
     ]
     word))
 
