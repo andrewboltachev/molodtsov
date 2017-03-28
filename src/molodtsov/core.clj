@@ -35,8 +35,34 @@
 
 ;; functions
 (defn o2m [word]
-  (let [word (re-sub "([дзлнст])и" (fn [_ a] (str a "ьи")) word)]
+  (let [
+        word (re-sub "([дзлнст])и" (fn [_ a] (str a "ьи")) word)
+        word (clojure.string/replace word #"і" "и")
+        word (clojure.string/replace word #"ддж" "дждж")
+        word (clojure.string/replace word #"ддз" "дздз")
+        word (clojure.string/replace word #"ттш" "тштш")
+        word (re-sub "([бвгжйкмпрчш])е" (fn [_ a] (str a "э")) word) ; й ?
+        word (re-sub #"([дзлнст])([еёюя])" (fn [_ a b] (str a "ь" ({"е" "э"
+                                                          "ё" "о"
+                                                          "ю" "у"
+                                                          "я" "а"} b))) word)
+    ]
     word))
+
+(defn word-caps-mode [word]
+  (let [count-pred (fn [pred coll]
+                     (count (filter pred coll)))
+        is-upper-char? (fn [x] (= (str x) (clojure.string/upper-case (str x))))
+        upper-letters (count-pred is-upper-char? word)
+        lower-letters (count-pred (comp not is-upper-char?) word)]
+    ; ...
+    (cond
+      (> upper-letters lower-letters)
+      2
+      (and (= upper-letters 1) (>= (count word) 1) (is-upper-char? (first word)))
+      1
+      :else
+      0)))
 
 ;; stuff
 (defn convert-string [string f]
@@ -46,17 +72,19 @@
         tokens (re-seq pattern string)
         tokens-converted (map (fn [token]
                                 (if (re-matches pattern token)
-                                  (f token)
+                                  (let [
+                                    converted (f token)]
+                                    )
                                   token)
                                 ) tokens)]
-    (clojure.string/join tokens)))
+    (clojure.string/join tokens-converted)))
 
 (defn main
   "I don't do a whole lot."
   []
   ;(println "Hello, World!")
   (run-tests 'molodtsov.core)
-  (let [s "Тані ті верманныд пӧртны коми гижӧдъяс Молодцов гижанногысь ӧнія гижанногӧ да мӧдарӧ."]
+  (let [s "Тані ті верманныд пӧртны коми гижӧдъяс Молодцов гижанногысь ӧнія гижанногӧ да мӧдарӧ. Дерт жӧ. Дядя Вася Тётя Зина."]
     (println
       (convert-string s o2m))
     ))
@@ -81,3 +109,16 @@
                                                           "я" "а"} b))) "дядя вася тётя зина")
        "дьадьа васьа тьотьа зина"
        )))
+
+
+(deftest test-word-caps-mode-0
+  (is (= (word-caps-mode "абу") 0)))
+
+(deftest test-word-caps-mode-2
+  (is (= (word-caps-mode "аБУ") 2)))
+
+(deftest test-word-caps-mode-0a
+  (is (= (word-caps-mode "абУ") 0)))
+
+(deftest test-word-caps-mode-1
+  (is (= (word-caps-mode "Абу") 1)))
