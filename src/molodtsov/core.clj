@@ -18,7 +18,9 @@
                                     (apply f token))
                                   (if
                                     (re-matches pattern token)
-                                    (f token)
+                                    (if (string? f)
+                                      f
+                                      (f token))
                                     token))
                                 ) tokens))))
 
@@ -70,6 +72,137 @@
         word (clojure.string/replace word #"й" "ј")
     ]
     word))
+
+(defn m2o [word]
+  (let [
+        util-iotate {"а" "я"
+                     "о" "ё"
+                     "у" "ю"}
+
+        util-soft2hard {
+                        "ԃ" "д"
+                        "ԅ" "з"
+                        "ԉ" "л"
+                        "ԋ" "н"
+                        "ԍ" "с"
+                        "ԏ" "т"}
+        
+        util-first2hard {
+                         "ԃԃ" "дԃ"
+                         "ԅԅ" "зԅ"
+                         "ԉԉ" "лԉ"
+                         "ԋԋ" "нԋ"
+                         "ԍԍ" "сԍ"
+                         "ԏԏ" "тԏ"
+                        }
+
+        repl-step2-06 (fn [_ a] (util-first2hard a))
+
+        repl-step3-01 (fn [_ a b] (str a "ъ" (util-iotate b)))
+        repl-step3-02 (fn [_ a b] (str a "ъе"))
+        repl-step3-05 (fn [_ a b] (str (util-soft2hard a) "ь" (util-iotate b)))
+        repl-step3-06 (fn [_ a] (str (util-soft2hard a) "ье"))
+        repl-step3-07 (fn [_ a] (str a "і"))
+        repl-step3-08 (fn [_ a] (str (util-soft2hard a) "и"))
+        repl-step3-09 (fn [_ a b] (str (util-soft2hard a) (util-iotate b)))
+        repl-step3-10 (fn [_ a] (str (util-soft2hard a) "е"))
+        repl-step3-11 (fn [_ a] (str (util-soft2hard a) "ь"))
+
+        repl-step4-02 (fn [_ a b] (str "чь" (util-iotate b)))
+        repl-step4-04 (fn [_ a b] (str "дзь" (util-iotate b)))
+        repl-step5-01 (fn [_ a] (util-iotate a))
+        repl-step6-01 (fn [_ a] (str a "е"))
+
+
+        step-1 [
+                ["ј" "й"]
+                ["і" "и"]
+                ["е" "э"]
+                ["ԁ" "д"]
+                ]
+
+        word (reduce (fn [word [k v]]
+                       (clojure.string/replace
+                         word
+                         (re-pattern k)
+                         v)) word step-1)
+
+	step-2 [
+		["ԇԇ" "дԇ"]
+		["җҗ" "ддж"]
+		["щщ" "ттш"]
+		["җ" "дж"]
+		["щ" "тш"]
+		["(ԃԃ|ԅԅ|ԉԉ|ԋԋ|ԍԍ|ԏԏ)" repl-step2-06]
+	]
+
+        word (reduce (fn [word [k v]]
+                       (re-sub
+                         (re-pattern k)
+                         v
+                         word)) word step-2)
+
+	step-3 [
+		["([бвгжкмпрфхцш])й([аоу])" repl-step3-01]
+		["([бвгжкмпрфхцш])йэ" repl-step3-02]
+		["([дзлнст])й([аоу])" repl-step3-01]
+		["([дзлнст])йэ" repl-step3-02]
+		["([ԃԅԉԋԍԏ])й([аоу])" repl-step3-05]
+		["([ԃԅԉԋԍԏ])йэ" repl-step3-06]
+		["([дзлнст])и" repl-step3-07]
+		["([ԃԅԉԋԍԏ])и" repl-step3-08]
+		["([ԃԅԉԋԍԏ])([аоу])" repl-step3-09]
+		["([ԃԅԉԋԍԏ])э" repl-step3-10]
+		["([ԃԅԉԋԍԏ])" repl-step3-11]
+	]
+
+        word (reduce (fn [word [k v]]
+                       (re-sub
+                         (re-pattern k)
+                         v
+                         word)) word step-3)
+
+	step-4 [
+		["чэ" "че"]
+		["([ч])й([аоу])" repl-step4-02]
+		["чйэ" "чье"]
+		["ԇэ" "дзе"]
+		["([ԇ])й([аоу])" repl-step4-04]
+		["ԇйэ" "дзье"]
+		["ԇ" "дз"]
+	]
+
+        word (reduce (fn [word [k v]]
+                       (re-sub
+                         (re-pattern k)
+                         v
+                         word)) word step-4)
+
+	step-5 [
+		["й([аоу])" repl-step5-01]
+		["йэ" "е"]
+	]
+
+        word (reduce (fn [word [k v]]
+                       (re-sub
+                         (re-pattern k)
+                         v
+                         word)) word step-5)
+
+	step-6 [
+		["([бвгжкмпрфхцш])э" repl-step6-01]
+	]
+
+        word (reduce (fn [word [k v]]
+                       (re-sub
+                         (re-pattern k)
+                         v
+                         word)) word step-6)
+
+        ]
+    word
+    )
+  )
 
 (defn word-caps-mode [word]
   (let [count-pred (fn [pred coll]
@@ -128,9 +261,14 @@
   []
   ;(println "Hello, World!")
   (run-tests 'molodtsov.core)
-  (let [s "Тані ті верманныд пӧртны коми гижӧдъяс Молодцов гижанногысь ӧнія гижанногӧ да мӧдарӧ. Дерт жӧ. Дядя Вася Тётя Зина."]
-    (println
-      (convert-string s o2m))
+  (let [s "Тані ті верманныд пӧртны коми гижӧдъяс Молодцов гижанногысь ӧнія гижанногӧ да мӧдарӧ. Дерт жӧ. Дядя Вася Тётя Зина."
+        
+        c1 (convert-string s o2m)
+        c2 (convert-string c1 m2o)]
+    (println s)
+    (println c1)
+    (println c2)
+    (println (= s c2))
     ))
 
 (deftest test1
