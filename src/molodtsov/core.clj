@@ -86,7 +86,7 @@
   (let [wcm (word-caps-mode word)
         token-to-lower (clojure.string/lower-case word)
         converted (f token-to-lower)]
-    (apply-caps-mode word wcm)))
+    (apply-caps-mode converted wcm)))
 
 
 (defn convert-string [string f]
@@ -96,10 +96,7 @@
         tokens (re-seq pattern string)
         tokens-converted (map (fn [token]
                                 (if (re-matches pattern token)
-                                  (let [token-to-lower (clojure.string/lower-case token)
-                                        converted (f token)]
-                                    
-                                    )
+                                  (convert-word token f)
                                   token)
                                 ) tokens)]
     (clojure.string/join tokens-converted)))
