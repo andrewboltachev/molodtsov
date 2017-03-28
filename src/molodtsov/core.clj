@@ -4,6 +4,7 @@
    )
   )
 
+;; utils
 (defn re-sub [pattern f string]
   (let [all-nil? (fn [xs] (not-any? (comp not nil?) xs))
         rest-nil? (fn [xs] (all-nil? (rest xs)))
@@ -21,17 +22,43 @@
                                     token))
                                 ) tokens))))
 
+;; constants
+(def russian-letters-small "абвгдеёжзийклмнопрстуфхцчшщъыьэюя")
+
+(def komi-letters-small (str russian-letters-small "іӧ"))
+
+(def komi-and-molodtsov-letters-small (str komi-letters-small "ԁјҗԇԃԅԉԋԍԏ"))
+
+(def komi-and-molodtsov-letters
+  (str komi-and-molodtsov-letters-small
+       (clojure.string/upper-case komi-and-molodtsov-letters-small)))
+
+;; functions
 (defn o2m [word]
-  (let [word 1]
+  (let [word (re-sub "([дзлнст])и" (fn [_ a] (str a "ьи")) word)]
     word))
+
+;; stuff
+(defn convert-string [string f]
+  (let [pattern (re-pattern (str "[" komi-and-molodtsov-letters "]+"
+                                      "|"
+                                      "[^" komi-and-molodtsov-letters "]+"))
+        tokens (re-seq pattern string)
+        tokens-converted (map (fn [token]
+                                (if (re-matches pattern token)
+                                  (f token)
+                                  token)
+                                ) tokens)]
+    (clojure.string/join tokens)))
 
 (defn main
   "I don't do a whole lot."
   []
   ;(println "Hello, World!")
   (run-tests 'molodtsov.core)
-  (println
-    ""
+  (let [s "Тані ті верманныд пӧртны коми гижӧдъяс Молодцов гижанногысь ӧнія гижанногӧ да мӧдарӧ."]
+    (println
+      (convert-string s o2m))
     ))
 
 (deftest test1
