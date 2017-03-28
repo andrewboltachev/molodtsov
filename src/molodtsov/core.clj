@@ -64,7 +64,31 @@
       :else
       0)))
 
+(defn apply-caps-mode [word wcm]
+  (let [word (clojure.string/lower-case word)]
+    (cond
+      (empty? word)
+      word
+
+      (= wcm 1)
+      (str
+        (clojure.string/upper-case (str (first word)))
+        (when (>= (count word) 1)
+          (subs word 1)))
+
+      (= wcm 2)
+      (clojure.string/upper-case word)
+      :else
+      word)))
+
 ;; stuff
+(defn convert-word [word f]
+  (let [wcm (word-caps-mode word)
+        token-to-lower (clojure.string/lower-case word)
+        converted (f token-to-lower)]
+    (apply-caps-mode word wcm)))
+
+
 (defn convert-string [string f]
   (let [pattern (re-pattern (str "[" komi-and-molodtsov-letters "]+"
                                       "|"
@@ -72,8 +96,9 @@
         tokens (re-seq pattern string)
         tokens-converted (map (fn [token]
                                 (if (re-matches pattern token)
-                                  (let [
-                                    converted (f token)]
+                                  (let [token-to-lower (clojure.string/lower-case token)
+                                        converted (f token)]
+                                    
                                     )
                                   token)
                                 ) tokens)]
@@ -122,3 +147,22 @@
 
 (deftest test-word-caps-mode-1
   (is (= (word-caps-mode "Абу") 1)))
+
+; apply-caps-mode
+(deftest test-apply-caps-mode-001
+  (is (= (apply-caps-mode "" 0) "")))
+
+(deftest test-apply-caps-mode-002
+  (is (= (apply-caps-mode "" 1) "")))
+
+(deftest test-apply-caps-mode-003
+  (is (= (apply-caps-mode "" 2) "")))
+
+(deftest test-apply-caps-mode-011
+  (is (= (apply-caps-mode "абу" 0) "абу")))
+
+(deftest test-apply-caps-mode-012
+  (is (= (apply-caps-mode "абу" 1) "Абу")))
+
+(deftest test-apply-caps-mode-013
+  (is (= (apply-caps-mode "абу" 2) "АБУ")))
