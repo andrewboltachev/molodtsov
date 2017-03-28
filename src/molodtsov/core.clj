@@ -99,7 +99,7 @@
         repl-step2-06 (fn [_ a] (util-first2hard a))
 
         repl-step3-01 (fn [_ a b] (str a "ъ" (util-iotate b)))
-        repl-step3-02 (fn [_ a b] (str a "ъе"))
+        repl-step3-02 (fn [_ a] (str a "ъе"))
         repl-step3-05 (fn [_ a b] (str (util-soft2hard a) "ь" (util-iotate b)))
         repl-step3-06 (fn [_ a] (str (util-soft2hard a) "ье"))
         repl-step3-07 (fn [_ a] (str a "і"))
@@ -244,17 +244,23 @@
     (apply-caps-mode converted wcm)))
 
 
-(defn convert-string [string f]
-  (let [pattern (re-pattern (str "[" komi-and-molodtsov-letters "]+"
+(defn convert-string-with-f [string f]
+  (let [positive-pattern (re-pattern (str "[" komi-and-molodtsov-letters "]+"))
+        pattern (re-pattern (str positive-pattern
                                       "|"
                                       "[^" komi-and-molodtsov-letters "]+"))
         tokens (re-seq pattern string)
         tokens-converted (map (fn [token]
-                                (if (re-matches pattern token)
-                                  (convert-word token f)
+                                (if (re-matches
+                                      positive-pattern
+                                      token)
+                                  (f token)
                                   token)
                                 ) tokens)]
     (clojure.string/join tokens-converted)))
+
+(defn convert-string [string f]
+  (convert-string-with-f string #(convert-word % f)))
 
 (defn main
   "I don't do a whole lot."
@@ -263,13 +269,32 @@
   (run-tests 'molodtsov.core)
   (let [s "Тані ті верманныд пӧртны коми гижӧдъяс Молодцов гижанногысь ӧнія гижанногӧ да мӧдарӧ. Дерт жӧ. Дядя Вася Тётя Зина."
         
-        c1 (convert-string s o2m)
-        c2 (convert-string c1 m2o)]
-    (println s)
-    (println c1)
-    (println c2)
-    (println (= s c2))
-    ))
+  s (slurp "../m1.txt")
+      ;  c1 (convert-string s o2m)
+      ;  c2 (convert-string c1 m2o)
+        ]
+
+    (convert-string-with-f s
+                    (fn [initial]
+                      (let [converted (convert-word initial o2m)
+                            converted-back (convert-word converted m2o)]
+                        (when (not= initial converted-back)
+                          (println initial converted converted-back)
+                          )
+
+
+                        converted-back
+                        )
+                      )
+                    )
+    #_(do
+      (println s)
+      (println c1)
+      (println c2)
+      (println (= s c2)))
+    )
+  
+  )
 
 (deftest test1
   (is (= (+ 2 3) 5)))
