@@ -42,10 +42,34 @@
         word (clojure.string/replace word #"ддз" "дздз")
         word (clojure.string/replace word #"ттш" "тштш")
         word (re-sub "([бвгжйкмпрчш])е" (fn [_ a] (str a "э")) word) ; й ?
-        word (re-sub #"([дзлнст])([еёюя])" (fn [_ a b] (str a "ь" ({"е" "э"
-                                                          "ё" "о"
-                                                          "ю" "у"
-                                                          "я" "а"} b))) word)
+        repl01 (fn [_ a b] (str a "ь" ({"е" "э"
+                                        "ё" "о"
+                                        "ю" "у"
+                                        "я" "а"} b)))
+        word (re-sub #"([дзлнст])([еёюя])" repl01 word)
+        word (clojure.string/replace word #"дж" "җ")
+        word (clojure.string/replace word #"дз" "ԇ")
+        word (clojure.string/replace word #"тш" "щ")
+        repl02 (fn [_ a] (str ({"е" "йэ"
+                                "ё" "йо"
+                                "ю" "йу"
+                                "я" "йа"} a)))
+        word (re-sub "([еёюя])" repl02 word)
+        word (clojure.string/replace word #"ъ" "")
+        repl03 (fn [_ a] (str ({"д" "ԃ"
+                                "з" "ԅ"
+                                "л" "ԉ"
+                                "н" "ԋ"
+                                "с" "ԍ"
+                                "т" "ԏ"} a)))
+        word (re-sub "([дзлнст])ь" repl03 word)
+        word (clojure.string/replace word #"ԇь" "ԇ")
+        word (clojure.string/replace word #"э" "е")
+        word (clojure.string/replace word #"д" "ԁ")
+        word (clojure.string/replace word #"и" "і")
+        word (clojure.string/replace word #"й" "ј")
+
+
     ]
     word))
 
