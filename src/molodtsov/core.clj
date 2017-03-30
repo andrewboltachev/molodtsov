@@ -43,7 +43,7 @@
         word (clojure.string/replace word #"ддж" "дждж")
         word (clojure.string/replace word #"ддз" "дздз")
         word (clojure.string/replace word #"ттш" "тштш")
-        word (re-sub "([бвгжйкмпрчш])е" (fn [_ a] (str a "э")) word) ; й ?
+        word (re-sub "([бвгжйкмпрчшфцх])е" (fn [_ a] (str a "э")) word) ; й ?
         repl01 (fn [_ a b] (str a "ь" ({"е" "э"
                                         "ё" "о"
                                         "ю" "у"
