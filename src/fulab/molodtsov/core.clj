@@ -1,4 +1,4 @@
-(ns molodtsov.core
+(ns fulab.molodtsov.core
   (:use
    [clojure.test :refer [deftest run-tests is]]
    )

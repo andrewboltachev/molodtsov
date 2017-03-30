@@ -1,20 +1,36 @@
 #!/usr/bin/env boot
 
+(def +version+ "1.0.0-alpha1-SNAPSHOT")
 
 (set-env!
   :project      'molodtsov
-  :version      "0.1.0-SNAPSHOT"
+  :version      +version+
   :dependencies '[
                   [ns-tracker "0.2.2"]
                   [adzerk/boot-reload        "0.4.13"]
                   [fipp "0.5.2"]
+                  [adzerk/bootlaces          "0.1.10"]
                   ]
   :source-paths    #{"src"}
   )
 
+(require '[adzerk.bootlaces :refer :all])
+
+
+(bootlaces! +version+)
+
+(task-options!
+  pom  {:project     'fulab/molodtsov
+        :version     +version+
+        :description "Komi Molodtsov alphabet converter (Clojure version)"
+        ;:url         ""
+        ;:scm         {:url ""}
+        :license     {"Eclipse Public License" "http://www.eclipse.org/legal/epl-v10.html"}})
+
 (use '[ns-tracker.core :only [ns-tracker]])
 (require '[adzerk.boot-reload :refer [reload]])
-(require '[molodtsov.core])
+(require '[fulab.molodtsov.core])
+
 
 (deftask wrap-reload
   "Reload namespaces of modified files before the request is passed to the
@@ -36,7 +52,7 @@
 (deftask main
   []
   (with-pre-wrap fileset
-    (molodtsov.core/main)
+    (fulab.molodtsov.core/main)
     fileset
     )
   )
