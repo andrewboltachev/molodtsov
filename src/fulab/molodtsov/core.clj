@@ -266,7 +266,7 @@
   "I don't do a whole lot."
   []
   ;(println "Hello, World!")
-  (run-tests 'molodtsov.core)
+  (run-tests 'fulab.molodtsov.core)
   (let [s "Тані ті верманныд пӧртны коми гижӧдъяс Молодцов гижанногысь ӧнія гижанногӧ да мӧдарӧ. Дерт жӧ. Дядя Вася Тётя Зина."
         
   s (slurp "../m1.txt")
